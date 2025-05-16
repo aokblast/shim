@@ -62,7 +62,11 @@
 
 int OPENSSL_issetugid(void)
 {
-    return issetugid();
+	if (getuid() != geteuid())
+        return 1;
+    if (getgid() != getegid())
+        return 1;
+    return 0;
 }
 
 #elif defined(OPENSSL_SYS_WIN32) || defined(OPENSSL_SYS_VXWORKS) || defined(OPENSSL_SYS_NETWARE)

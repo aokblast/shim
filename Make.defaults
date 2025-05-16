@@ -6,7 +6,7 @@
 COMPILER	?= gcc
 CC		= $(CROSS_COMPILE)$(COMPILER)
 HOSTCC		= $(COMPILER)
-LD		= $(CROSS_COMPILE)ld
+LD		= $(CROSS_COMPILE)ld.bfd
 OBJCOPY		= $(CROSS_COMPILE)objcopy
 DOS2UNIX	?= dos2unix
 D2UFLAGS	?= -r -l -F -f -n
@@ -17,7 +17,7 @@ PK12UTIL	?= pk12util
 CERTUTIL	?= certutil
 PESIGN		?= pesign
 SBSIGN		?= sbsign
-prefix		?= /usr
+prefix		?= /usr/local
 prefix		:= $(abspath $(prefix))
 datadir		?= $(prefix)/share/
 PKGNAME		?= shim
@@ -31,8 +31,8 @@ OSLABEL		?= $(EFIDIR)
 DEFAULT_LOADER	?= \\\\grub$(ARCH_SUFFIX).efi
 DASHJ		?= -j$(shell echo $$(($$(grep -c "^model name" /proc/cpuinfo) + 1)))
 
-ARCH		?= $(shell $(CC) -dumpmachine | cut -f1 -d- | sed s,i[3456789]86,ia32,)
-OBJCOPY_GTE224	= $(shell expr `$(OBJCOPY) --version |grep ^"GNU objcopy" | sed 's/^.*\((.*)\|version\) //g' | cut -f1-2 -d.` \>= 2.24)
+ARCH		?= $(shell $(CC) -dumpmachine | cut -f1 -d- | gsed s,i[3456789]86,ia32,)
+OBJCOPY_GTE224	= $(shell expr `$(OBJCOPY) --version |grep ^"GNU objcopy" | gsed 's/^.*\((.*)\|version\) //g' | cut -f1-2 -d.` \>= 2.24)
 OPTIMIZATIONS	?= -Os
 FA_OPTIMIZATIONS ?= -O2
 ifneq ($(FANALYZER),)
@@ -105,7 +105,8 @@ INCLUDES	= -nostdinc \
 		  -I$(EFI_INCLUDE) -I$(EFI_INCLUDE)/$(ARCH_GNUEFI) -I$(EFI_INCLUDE)/protocol \
 		  -I$(TOPDIR)/include -iquote $(TOPDIR) -iquote $(shell pwd) \
 		  -isystem $(TOPDIR)/include/system \
-		  -isystem $(shell $(CC) $(ARCH_CFLAGS) -print-file-name=include)
+		  -isystem $(shell $(CC) $(ARCH_CFLAGS) -print-file-name=include) \
+		  -isystem /usr/include
 
 override DEFAULT_FEATUREFLAGS = \
 		-std=gnu11 \
@@ -115,6 +116,7 @@ override DEFAULT_FEATUREFLAGS = \
 		-fno-stack-protector \
 		-fno-strict-aliasing \
 		-fpic \
+		-shared \
 		-fshort-wchar
 $(call update-variable,FEATUREFLAGS)
 $(call conditional-add-flag,$(FANALYZER),analyzer,FEATUREFLAGS,-fanalyzer)
@@ -142,7 +144,7 @@ CFLAGS		= $(FEATUREFLAGS) \
 POST_PROCESS_PE_FLAGS =
 
 ifneq ($(origin OVERRIDE_SECURITY_POLICY), undefined)
-	DEFINES	+= -DOVERRIDE_SECURITY_POLICY
+	DEFINES	 += -DOVERRIDE_SECURITY_POLICY
 endif
 
 ifneq ($(origin REQUIRE_TPM), undefined)
@@ -188,7 +190,7 @@ ifneq ($(origin SBAT_AUTOMATIC_DATE), undefined)
 DEFINES		+= -DSBAT_AUTOMATIC_DATE=$(SBAT_AUTOMATIC_DATE)
 endif
 
-LDFLAGS		= --hash-style=sysv -nostdlib -znocombreloc -T $(EFI_LDS) -shared -Bsymbolic -L$(LOCAL_EFI_PATH) -L$(LIBDIR) -LCryptlib -LCryptlib/OpenSSL $(EFI_CRT_OBJS) --build-id=sha1 $(ARCH_LDFLAGS) --no-undefined
+LDFLAGS		= --hash-style=sysv -nostdlib -znocombreloc -T $(EFI_LDS) -shared -Bsymbolic -L$(LOCAL_EFI_PATH) -L$(LIBDIR) -LCryptlib -LCryptlib/OpenSSL $(EFI_CRT_OBJS) --build-id=sha1 $(ARCH_LDFLAGS) --no-undefined --format elf64-x86-64
 
 ifneq ($(DEBUG),)
 export DEBUG

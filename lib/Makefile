@@ -12,7 +12,8 @@ INCLUDES	= $(EFI_INCLUDES) \
 		  -I$(CRYPTDIR) \
 		  -I$(TOPDIR) \
 		  -isystem $(TOPDIR)/include/system \
-		  -isystem $(shell $(CC) -print-file-name=include)
+		  -isystem $(shell $(CC) -print-file-name=include) \
+		  -isystem /usr/include
 
 CLANG_BUGS	= $(if $(findstring gcc,$(CC)),-maccumulate-outgoing-args,)
 

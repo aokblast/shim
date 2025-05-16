@@ -16,9 +16,10 @@ INCLUDES	= -I$(OSSLDIR) -I$(CRYPTDIR) -I$(OSSLDIR)/Include/ \
 		  -I$(OSSLDIR)/crypto/asn1 -I$(OSSLDIR)/crypto/evp \
 		  -I$(OSSLDIR)/crypto/modes -I$(OSSLDIR)/crypto/include \
 		  -isystem $(TOPDIR)/include/system \
-		  -isystem $(shell $(CC) -print-file-name=include)
+		  -isystem $(shell $(CC) -print-file-name=include) \
+		  -isystem /usr/include
 
-FEATUREFLAGS	+= -nostdinc
+FEATUREFLAGS	+= -nostdinc -fpic
 
 WARNFLAGS	+= -Wno-empty-body \
 		   -Wno-implicit-fallthrough \

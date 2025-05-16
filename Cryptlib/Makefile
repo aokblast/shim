@@ -9,7 +9,8 @@ FEATUREFLAGS	+= -nostdinc
 INCLUDES	= -I$(CRYPTDIR) -I$(CRYPTDIR)/Include \
 		  $(EFI_INCLUDES) \
 		  -isystem $(TOPDIR)/include/system \
-		  -isystem $(shell $(CC) -print-file-name=include)
+		  -isystem $(shell $(CC) -print-file-name=include) \
+		  -isystem /usr/include
 
 WARNFLAGS	+= -Wno-unused-parameter \
 		   -Wno-unused-but-set-variable

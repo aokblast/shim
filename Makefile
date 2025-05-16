@@ -85,8 +85,8 @@ ifneq ($(origin VENDOR_CERT_FILE), undefined)
 endif
 
 compile_commands.json : Makefile Make.rules Make.defaults 
-	make clean
-	bear -- make COMPILER=clang WARNFLAGS+="-Wno-#warnings" test all
+	gmake clean
+	bear -- gmake COMPILER=clang WARNFLAGS+="-Wno-#warnings" test all
 	sed -i \
 		-e 's/"-maccumulate-outgoing-args",//g' \
 		$@
@@ -168,7 +168,7 @@ $(MMSONAME): $(MOK_OBJS) $(LIBS)
 
 gnu-efi/$(ARCH_GNUEFI)/gnuefi/libgnuefi.a gnu-efi/$(ARCH_GNUEFI)/lib/libefi.a: CFLAGS+=-DGNU_EFI_USE_EXTERNAL_STDARG
 gnu-efi/$(ARCH_GNUEFI)/gnuefi/libgnuefi.a gnu-efi/$(ARCH_GNUEFI)/lib/libefi.a:
-	mkdir -p gnu-efi/lib gnu-efi/gnuefi
+	mkdir -p gnu-efi/lib gnu-efi/gnuefi/
 	$(MAKE) -C gnu-efi \
 		COMPILER="$(COMPILER)" \
 		CCC_CC="$(COMPILER)" \
@@ -302,7 +302,7 @@ endif
 		-j .debug_line -j .debug_str -j .debug_ranges \
 		-j .note.gnu.build-id \
 		--file-alignment 0x1000 \
-		$< $@
+		$(FORMAT) $< $@
 
 ifneq ($(origin ENABLE_SBSIGN),undefined)
 %.efi.signed: %.efi shim.key shim.crt
@@ -316,7 +316,7 @@ else
 endif
 
 fuzz fuzz-clean fuzz-coverage fuzz-lto :
-	@make -f $(TOPDIR)/include/fuzz.mk \
+	@$(MAKE) -f $(TOPDIR)/include/fuzz.mk \
 		COMPILER="$(COMPILER)" \
 		CROSS_COMPILE="$(CROSS_COMPILE)" \
 		CLANG_WARNINGS="$(CLANG_WARNINGS)" \
@@ -325,7 +325,7 @@ fuzz fuzz-clean fuzz-coverage fuzz-lto :
 		fuzz-clean $@
 
 test test-clean test-coverage test-lto : generated_sbat_var_defs.h
-	@make -f $(TOPDIR)/include/test.mk \
+	@$(MAKE) -f $(TOPDIR)/include/test.mk \
 		COMPILER="$(COMPILER)" \
 		CROSS_COMPILE="$(CROSS_COMPILE)" \
 		CLANG_WARNINGS="$(CLANG_WARNINGS)" \
@@ -334,16 +334,16 @@ test test-clean test-coverage test-lto : generated_sbat_var_defs.h
 		test-clean $@
 
 $(patsubst %.c,%,$(wildcard fuzz-*.c)) :
-	@make -f $(TOPDIR)/include/fuzz.mk EFI_INCLUDES="$(EFI_INCLUDES)" ARCH_DEFINES="$(ARCH_DEFINES)" $@
+	@$(MAKE) -f $(TOPDIR)/include/fuzz.mk EFI_INCLUDES="$(EFI_INCLUDES)" ARCH_DEFINES="$(ARCH_DEFINES)" $@
 
 $(patsubst %.c,%,$(wildcard test-*.c)) :
-	@make -f $(TOPDIR)/include/test.mk EFI_INCLUDES="$(EFI_INCLUDES)" ARCH_DEFINES="$(ARCH_DEFINES)" $@
+	@$(MAKE) -f $(TOPDIR)/include/test.mk EFI_INCLUDES="$(EFI_INCLUDES)" ARCH_DEFINES="$(ARCH_DEFINES)" $@
 
 clean-fuzz-objs:
-	@make -f $(TOPDIR)/include/fuzz.mk EFI_INCLUDES="$(EFI_INCLUDES)" ARCH_DEFINES="$(ARCH_DEFINES)" clean
+	@$(MAKE) -f $(TOPDIR)/include/fuzz.mk EFI_INCLUDES="$(EFI_INCLUDES)" ARCH_DEFINES="$(ARCH_DEFINES)" clean
 
 clean-test-objs:
-	@make -f $(TOPDIR)/include/test.mk EFI_INCLUDES="$(EFI_INCLUDES)" ARCH_DEFINES="$(ARCH_DEFINES)" clean
+	@$(MAKE) -f $(TOPDIR)/include/test.mk EFI_INCLUDES="$(EFI_INCLUDES)" ARCH_DEFINES="$(ARCH_DEFINES)" clean
 
 .PHONY : $(patsubst %.c,%,$(wildcard fuzz-*.c)) fuzz
 .PHONY : $(patsubst %.c,%,$(wildcard test-*.c)) test
